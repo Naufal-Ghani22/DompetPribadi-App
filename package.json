@@ -1,0 +1,8 @@
+{
+  "name": "dompet-pribadi",
+  "version": "1.0.0",
+  "description": "Dompet — budgeting pribadi (PWA + desktop island)",
+  "main": "desktop/main.js",
+  "scripts": { "desktop": "electron ." },
+  "devDependencies": { "electron": "33.2.1" }
+}

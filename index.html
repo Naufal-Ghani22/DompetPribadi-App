@@ -119,6 +119,7 @@ async function pull(){if(!user)return;st('Mengambil data…');
   if(data&&Date.parse(data.updated_at)>(D._u||0)){D=data.data;store();render();st('Tersinkron ✓')}else push()}
 function authUI(){$('#acc-out').hidden=!!user;$('#acc-in').hidden=!user;if(user)$('#who').textContent=user.email}
 sb?.auth.onAuthStateChange((e,s)=>{const was=user?.id;user=s?.user||null;authUI();if(user&&user.id!==was)pull()});
+addEventListener('storage',e=>{if(e.key!==K)return;try{D=JSON.parse(e.newValue)||D}catch{}render()});
 addEventListener('online',()=>user&&pull());
 document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&user&&pull());
 const rp=n=>'Rp'+Math.round(n).toLocaleString('id-ID');
