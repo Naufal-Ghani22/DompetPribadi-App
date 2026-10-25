@@ -88,7 +88,7 @@ section:not([hidden]){animation:up .45s var(--ease)}
 
   <section id="v-budget" hidden>
     <h2>Anggaran per kategori</h2><div id="blist"></div>
-    <p class="mut">Ketuk kategori untuk mengatur batas bulanan.</p>
+    <p class="mut">Klik kartu kategori untuk mengatur batas bulanannya. Pengeluaran di kategori itu akan mengurangi sisa batasnya.</p>
   </section>
 
   <section id="v-set" hidden>
@@ -121,6 +121,13 @@ section:not([hidden]){animation:up .45s var(--ease)}
   <button data-v="set"><span>⚙️</span>Atur</button>
 </nav>
 
+<div class="sheet" id="bs"><div>
+  <div class="mut">Batas anggaran bulanan</div><h3 id="bt" style="font-size:20px;margin:4px 0 12px"></h3>
+  <input id="bamt" inputmode="numeric" placeholder="Contoh: 300.000">
+  <div class="row" style="justify-content:flex-start;gap:6px;margin-bottom:12px;flex-wrap:wrap"><button class="mbtn qa" data-v="100000">100rb</button><button class="mbtn qa" data-v="300000">300rb</button><button class="mbtn qa" data-v="500000">500rb</button><button class="mbtn qa" data-v="1000000">1jt</button></div>
+  <button class="btn" id="bsave">Simpan batas</button>
+  <div class="row" style="margin-top:10px"><button class="btn g" id="bcancel">Batal</button><button class="btn r" id="bdel" hidden>Hapus batas</button></div>
+</div></div>
 <div class="sheet" id="sh"><div>
   <div class="seg" id="type"><button data-t="out" class="on">Pengeluaran</button><button data-t="in">Pemasukan</button></div>
   <input id="amt" inputmode="numeric" placeholder="Jumlah (Rp)">
@@ -193,7 +200,17 @@ $('#save').onclick=()=>{const a=+$('#amt').value.replace(/\D/g,'');if(!a)return 
 let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200)}
 $('#del').onclick=()=>{D.tx=D.tx.filter(x=>x.id!==editId);close();save()};
 $('#list').onclick=e=>{const r=e.target.closest('[data-id]');if(r)open(D.tx.find(t=>t.id==r.dataset.id))};
-$('#blist').onclick=e=>{const r=e.target.closest('[data-b]');if(!r)return;const v=prompt('Batas bulanan untuk '+cat(r.dataset.b).n+' (Rp, 0 = hapus):',D.budget[r.dataset.b]||'');if(v===null)return;const n=+v.replace(/\D/g,'');n?D.budget[r.dataset.b]=n:delete D.budget[r.dataset.b];save()};
+let bId=null;
+$('#blist').onclick=e=>{const r=e.target.closest('[data-b]');if(!r)return;bId=r.dataset.b;const c=cat(bId);
+  $('#bt').textContent=c.i+' '+c.n;$('#bamt').value=D.budget[bId]?D.budget[bId].toLocaleString('id-ID'):'';$('#bdel').hidden=!D.budget[bId];
+  $('#bs').classList.add('open');setTimeout(()=>$('#bamt').focus(),80)};
+const bclose=()=>$('#bs').classList.remove('open');
+$('#bamt').oninput=$('#amt').oninput;
+$('#bsave').onclick=()=>{const n=+$('#bamt').value.replace(/\D/g,'');if(!n)return $('#bamt').focus();D.budget[bId]=n;bclose();save();toast('Batas '+cat(bId).n+' '+rp(n)+' ✓')};
+$('#bdel').onclick=()=>{delete D.budget[bId];bclose();save()};
+$('#bcancel').onclick=bclose;$('#bs').onclick=e=>{if(e.target.id==='bs')bclose()};
+$('#bamt').onkeydown=e=>e.key==='Enter'&&$('#bsave').click();
+document.querySelectorAll('.qa').forEach(b=>b.onclick=()=>{$('#bamt').value=(+b.dataset.v).toLocaleString('id-ID');$('#bamt').focus()});
 $('#cadd').onclick=()=>{const n=$('#cname').value.trim();if(!n)return;D.cats.push({id:'c'+Date.now(),n,i:$('#cicon').value.trim()||'🏷️'});$('#cname').value=$('#cicon').value='';save()};
 $('#clist').onclick=e=>{const id=e.target.dataset.rm;if(id&&confirm('Hapus kategori ini?')){D.cats=D.cats.filter(c=>c.id!==id);save()}};
 $('#prev').onclick=()=>{cur.setDate(1);cur.setMonth(cur.getMonth()-1);render()};
@@ -212,6 +229,7 @@ async function auth(up){const email=$('#email').value.trim(),password=$('#pass')
   $('#pass').value='';if(up&&!data.session)alert('Akun dibuat! Buka email konfirmasi, lalu kembali ke sini dan tekan Masuk.')}
 $('#login').onclick=()=>auth(false);$('#signup').onclick=()=>auth(true);
 $('#logout').onclick=()=>sb.auth.signOut();
+addEventListener('keydown',e=>{if(e.key==='Escape'){close();bclose()}if(e.key==='Enter'&&$('#sh').classList.contains('open')&&e.target.tagName==='INPUT')$('#save').click()});
 render();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script>
