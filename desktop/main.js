@@ -20,6 +20,23 @@ function createIsland() {
   island.once('ready-to-show', () => island.showInactive());
 }
 
+// keluar total: tutup semua jendela, hapus ikon tray, matikan proses
+function quit() {
+  globalShortcut.unregisterAll();
+  if (tray) tray.destroy();
+  BrowserWindow.getAllWindows().forEach(w => w.destroy());
+  app.exit(0);
+}
+
+function islandMenu() {
+  Menu.buildFromTemplate([
+    { label: 'Buka Dompet', click: openFull },
+    { label: 'Catat cepat', click: () => island.webContents.send('quick-add') },
+    { type: 'separator' },
+    { label: 'Keluar', click: quit },
+  ]).popup({ window: island });
+}
+
 function openFull() {
   if (full && !full.isDestroyed()) return full.show(), full.focus();
   full = new BrowserWindow({
@@ -39,9 +56,10 @@ app.whenReady().then(() => {
     { type: 'separator' },
     { label: 'Mulai saat Windows menyala', type: 'checkbox', checked: app.getLoginItemSettings().openAtLogin,
       click: i => app.setLoginItemSettings({ openAtLogin: i.checked }) },
-    { label: 'Keluar', click: () => app.quit() },
+    { label: 'Keluar (Ctrl+Alt+Q)', click: quit },
   ]));
   tray.on('click', openFull);
+  globalShortcut.register('Control+Alt+Q', quit);
   globalShortcut.register('Control+Alt+D', () => { island.focus(); island.webContents.send('quick-add'); });
 });
 
@@ -50,5 +68,7 @@ ipcMain.on('hover', (_, on) => {
   if (on) island.focus();
 });
 ipcMain.on('open-app', openFull);
+ipcMain.on('quit', quit);
+ipcMain.on('menu', islandMenu);
 app.on('window-all-closed', () => {}); // tetap hidup di tray
 app.on('will-quit', () => globalShortcut.unregisterAll());

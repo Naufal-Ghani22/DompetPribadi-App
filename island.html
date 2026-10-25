@@ -61,6 +61,7 @@ html,body{background:transparent;overflow:hidden;height:100%;font:13px/1.35 "Seg
     </div>
     <div class="bars" id="pk-bars"></div>
     <div class="row" style="position:absolute;right:16px;top:14px;gap:6px">
+      <button class="ib" id="go-quit" title="Keluar dari Dompet">⏻</button>
       <button class="ib" id="go-app" title="Buka aplikasi">↗</button>
       <button class="ib ac" id="go-add">+ Catat</button>
     </div>
@@ -108,6 +109,8 @@ isl.addEventListener('mouseenter',()=>{clearTimeout(leaveT);window.island?.hover
 isl.addEventListener('mouseleave',()=>{if(isl.dataset.s==='add')return window.island?.hover(false);leaveT=setTimeout(close,280)});
 $('#go-add').onclick=openAdd;$('#go-app').onclick=()=>{window.island?.openApp();close()};
 $('#cancel').onclick=close;
+$('#go-quit').onclick=()=>window.island?.quit();
+isl.addEventListener('contextmenu',e=>{e.preventDefault();window.island?.menu()});
 $('#type').onclick=e=>{const t=e.target.dataset.t;if(!t)return;type=t;document.querySelectorAll('#type button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   if(t==='in'&&D.cats.find(c=>c.id==='gaji'))cat='gaji';render();setS('add')};
 $('#chips').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;cat=b.dataset.c;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b))};
