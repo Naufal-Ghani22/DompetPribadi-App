@@ -125,6 +125,12 @@ $('#save').onclick=save;
 addEventListener('keydown',e=>{if(isl.dataset.s!=='add')return;if(e.key==='Escape')close();if(e.key==='Enter')save()});
 addEventListener('storage',e=>e.key===K&&render());
 window.island?.onQuickAdd(openAdd);
+// tarik data terbaru dari server (kalau sudah login di aplikasi lengkap)
+let lastPull=0;async function pull(){if(!sb||Date.now()-lastPull<20000)return;lastPull=Date.now();
+  const{data:{session}}=await sb.auth.getSession();if(!session)return;
+  const{data}=await sb.from('user_data').select('data,updated_at').maybeSingle();
+  const cur=load();if(data&&Date.parse(data.updated_at)>((cur&&cur._u)||0)){localStorage.setItem(K,JSON.stringify(data.data));render();if(isl.dataset.s==='peek')setS('peek')}}
+isl.addEventListener('mouseenter',pull);setInterval(pull,5*60000);pull();
 render();
 </script>
 </body>

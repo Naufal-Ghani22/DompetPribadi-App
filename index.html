@@ -35,22 +35,55 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
 .btn.g{background:var(--line);color:var(--tx)}.btn.r{background:#3a1d1d;color:var(--rd)}
 .seg{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:10px}.seg button{flex:1;border:0;background:none;color:var(--mut);padding:10px;border-radius:9px;font:inherit;font-weight:600}
 .seg button.on{background:var(--card);color:var(--tx)}
-.sheet{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;z-index:9}.sheet.open{display:flex}
-.sheet>div{background:var(--card);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+.sheet{position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;z-index:9;opacity:0;pointer-events:none;transition:opacity .25s var(--ease)}.sheet.open{opacity:1;pointer-events:auto}
+.sheet>div{transform:translateY(100%);transition:transform .5s var(--spring);background:var(--card);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
 .mbtn{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:6px 12px;font:inherit}
 .empty{text-align:center;color:var(--mut);padding:30px 0}
 [hidden]{display:none!important}
+:root{--spring:cubic-bezier(.32,1.25,.5,1);--ease:cubic-bezier(.2,.8,.2,1)}
+.sheet.open>div{transform:none}
+section:not([hidden]){animation:up .45s var(--ease)}
+@keyframes up{from{opacity:0;transform:translateY(12px)}}
+.tx{animation:up .4s var(--ease) both;animation-delay:calc(var(--i,0)*35ms)}
+.bar i{width:0;transition:width .9s var(--ease)}
+.card{transition:border-color .2s,transform .25s var(--ease)}
+.btn,.mbtn,.fab,nav button,.seg button{cursor:pointer;transition:transform .15s,background .2s,color .2s,box-shadow .2s}
+.btn:active,.mbtn:active,.fab:active{transform:scale(.95)}
+#bal{font-variant-numeric:tabular-nums}
+.brand{display:none}
+.cats .b{display:grid;grid-template-columns:120px 1fr 100px;gap:10px;align-items:center;font-size:13px;margin:8px 0}
+.cats .b span:last-child{text-align:right;color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:#000;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:all .4s var(--spring);z-index:20;pointer-events:none;font-weight:600}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (hover:hover){.card[data-b]{cursor:pointer}.card[data-b]:hover{border-color:#34403a;transform:translateY(-2px)}.tx{cursor:pointer;border-radius:10px}.tx:hover{background:#1d2622}.mbtn:hover{background:var(--line)}.fab:hover{box-shadow:0 8px 30px #3ddc9755}}
+@media (min-width:900px){
+  body{padding:0 0 0 232px}
+  nav{top:0;right:auto;width:232px;flex-direction:column;justify-content:flex-start;gap:4px;padding:24px 14px;border-top:0;border-right:1px solid var(--line);background:#0c100e}
+  nav button{flex:none;flex-direction:row;gap:12px;font-size:14px;padding:11px 14px;border-radius:12px;justify-content:flex-start}
+  nav button span{font-size:18px}nav button.on{background:#17201b}nav button:hover{color:var(--tx)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:0 10px 22px}
+  .brand i{width:30px;height:30px;border-radius:9px;background:var(--ac);display:inline-block}
+  main{max-width:1080px;padding:28px 40px}
+  h1{justify-content:flex-start;gap:14px;font-size:26px}
+  #v-home:not([hidden]){display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+  #v-home h2{display:none}
+  #blist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}#blist .card{margin:0}
+  .fab{bottom:32px;right:40px}
+  .sheet{align-items:center}.sheet>div{max-width:440px;border-radius:22px;transform:scale(.94) translateY(20px)}
+  .toast{bottom:40px}
+}
 </style>
 </head>
 <body>
 <main>
   <h1><button class="mbtn" id="prev">‹</button><span id="mon"></span><button class="mbtn" id="next">›</button></h1>
 
-  <section id="v-home">
+  <section id="v-home"><div>
     <div class="card"><div class="mut">Saldo bulan ini</div><div class="big" id="bal"></div>
       <div class="grid" style="margin-top:12px"><div><div class="mut">Pemasukan</div><b class="in" id="tin"></b></div><div><div class="mut">Pengeluaran</div><b class="out" id="tout"></b></div></div>
     </div>
-    <h2>Transaksi</h2><div class="card" id="list"></div>
+    <div class="card cats"><div class="mut">Pengeluaran per kategori</div><div id="ccat"></div></div></div>
+    <div><h2>Transaksi</h2><div class="card" id="list"></div></div>
   </section>
 
   <section id="v-budget" hidden>
@@ -62,7 +95,8 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
     <h2>Akun & Sinkron</h2>
     <div class="card" id="acc">
       <div id="acc-out"><p class="mut" style="margin-bottom:10px">Login untuk menyimpan data online & sinkron antar perangkat.</p>
-        <input id="email" type="email" placeholder="Email kamu"><button class="btn" id="login">Kirim link login</button></div>
+        <input id="email" type="email" placeholder="Email" autocomplete="email"><input id="pass" type="password" placeholder="Password (min. 6 karakter)" autocomplete="current-password">
+        <div class="grid"><button class="btn" id="login">Masuk</button><button class="btn g" id="signup">Daftar</button></div></div>
       <div id="acc-in" hidden><div class="row"><div><b id="who"></b><div class="mut" id="sync"></div></div><button class="mbtn" id="logout">Keluar</button></div></div>
     </div>
     <h2>Kategori</h2>
@@ -81,6 +115,7 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
 
 <button class="fab" id="fab">+</button>
 <nav>
+  <div class="brand"><i></i>Dompet</div>
   <button data-v="home" class="on"><span>🏠</span>Beranda</button>
   <button data-v="budget"><span>📊</span>Anggaran</button>
   <button data-v="set"><span>⚙️</span>Atur</button>
@@ -96,6 +131,7 @@ input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:
   <div class="row" style="margin-top:10px"><button class="btn g" id="cancel">Batal</button><button class="btn r" id="del" hidden>Hapus</button></div>
 </div></div>
 
+<div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const $=s=>document.querySelector(s),K='dompet-data';
@@ -133,10 +169,13 @@ function render(){
   const m=D.tx.filter(t=>t.d.startsWith(ym())).sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
   const tin=m.filter(t=>t.t==='in').reduce((s,t)=>s+t.a,0),tout=m.filter(t=>t.t==='out').reduce((s,t)=>s+t.a,0);
   $('#bal').textContent=rp(tin-tout);$('#tin').textContent=rp(tin);$('#tout').textContent=rp(tout);
-  $('#list').innerHTML=m.length?m.map(t=>{const c=cat(t.c);return`<div class="tx" data-id="${t.id}"><div class="ic">${c.i}</div><div class="f"><b>${esc(t.n||c.n)}</b><span class="mut">${c.n} · ${new Date(t.d).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</span></div><b class="${t.t}">${t.t==='in'?'+':'−'}${rp(t.a)}</b></div>`}).join(''):'<div class="empty">Belum ada transaksi.<br>Ketuk + untuk menambah.</div>';
+  $('#list').innerHTML=m.length?m.map((t,i)=>{const c=cat(t.c);return`<div class="tx" style="--i:${Math.min(i,15)}" data-id="${t.id}"><div class="ic">${c.i}</div><div class="f"><b>${esc(t.n||c.n)}</b><span class="mut">${c.n} · ${new Date(t.d).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}</span></div><b class="${t.t}">${t.t==='in'?'+':'−'}${rp(t.a)}</b></div>`}).join(''):'<div class="empty">Belum ada transaksi.<br>Ketuk + untuk menambah.</div>';
+  const byc=D.cats.map(c=>({c,v:m.filter(t=>t.t==='out'&&t.c===c.id).reduce((s,t)=>s+t.a,0)})).filter(x=>x.v).sort((a,b)=>b.v-a.v);
+  $('#ccat').innerHTML=byc.length?byc.map(x=>`<div class="b"><span>${x.c.i} ${esc(x.c.n)}</span><div class="bar" style="margin:0"><i data-w="${x.v/byc[0].v*100}%"></i></div><span>${rp(x.v)}</span></div>`).join(''):'<div class="empty" style="padding:14px 0">Belum ada pengeluaran.</div>';
   $('#blist').innerHTML=D.cats.map(c=>{const sp=m.filter(t=>t.t==='out'&&t.c===c.id).reduce((s,t)=>s+t.a,0),b=D.budget[c.id]||0,p=b?Math.min(100,sp/b*100):0,col=p>=100?'var(--rd)':p>=80?'var(--yl)':'var(--ac)';
-    return`<div class="card" data-b="${c.id}"><div class="row"><b>${c.i} ${esc(c.n)}</b><span class="mut">${rp(sp)}${b?' / '+rp(b):''}</span></div>${b?`<div class="bar"><i style="width:${p}%;background:${col}"></i></div><div class="mut" style="margin-top:6px">${sp>b?'Lewat '+rp(sp-b):'Sisa '+rp(b-sp)}</div>`:'<div class="mut">Belum ada batas</div>'}</div>`}).join('');
+    return`<div class="card" data-b="${c.id}"><div class="row"><b>${c.i} ${esc(c.n)}</b><span class="mut">${rp(sp)}${b?' / '+rp(b):''}</span></div>${b?`<div class="bar"><i data-w="${p}%" style="background:${col}"></i></div><div class="mut" style="margin-top:6px">${sp>b?'Lewat '+rp(sp-b):'Sisa '+rp(b-sp)}</div>`:'<div class="mut">Belum ada batas</div>'}</div>`}).join('');
   $('#clist').innerHTML=D.cats.map(c=>`<div class="row tx"><span>${c.i} ${esc(c.n)}</span><button class="mbtn" data-rm="${c.id}">✕</button></div>`).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('.bar i[data-w]').forEach(i=>i.style.width=i.dataset.w)));
   $('#cat').innerHTML=D.cats.map(c=>`<option value="${c.id}">${c.i} ${esc(c.n)}</option>`).join('');
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -150,7 +189,8 @@ $('#type').onclick=e=>e.target.dataset.t&&setType(e.target.dataset.t);
 $('#amt').oninput=e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v?(+v).toLocaleString('id-ID'):''};
 $('#save').onclick=()=>{const a=+$('#amt').value.replace(/\D/g,'');if(!a)return $('#amt').focus();
   const t={id:editId??Date.now(),t:tType,a,c:$('#cat').value,n:$('#note').value.trim(),d:$('#date').value||today()};
-  D.tx=D.tx.filter(x=>x.id!==t.id).concat(t);close();save()};
+  D.tx=D.tx.filter(x=>x.id!==t.id).concat(t);close();save();toast((t.t==='in'?'+':'−')+rp(a)+' · '+cat(t.c).n+' ✓')};
+let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200)}
 $('#del').onclick=()=>{D.tx=D.tx.filter(x=>x.id!==editId);close();save()};
 $('#list').onclick=e=>{const r=e.target.closest('[data-id]');if(r)open(D.tx.find(t=>t.id==r.dataset.id))};
 $('#blist').onclick=e=>{const r=e.target.closest('[data-b]');if(!r)return;const v=prompt('Batas bulanan untuk '+cat(r.dataset.b).n+' (Rp, 0 = hapus):',D.budget[r.dataset.b]||'');if(v===null)return;const n=+v.replace(/\D/g,'');n?D.budget[r.dataset.b]=n:delete D.budget[r.dataset.b];save()};
@@ -164,9 +204,13 @@ document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(
 $('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,1)],{type:'application/json'}));a.download='dompet-backup-'+today()+'.json';a.click()};
 $('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(s=>{try{const d=JSON.parse(s);if(!Array.isArray(d.tx))throw 0;D=d;save();alert('Data berhasil diimpor')}catch{alert('File tidak valid')}})};
 $('#wipe').onclick=()=>{if(confirm('Hapus SEMUA data? Tidak bisa dibatalkan.')){D=structuredClone(DEF);save()}};
-$('#login').onclick=async()=>{const e=$('#email').value.trim();if(!e)return $('#email').focus();
-  $('#login').disabled=true;const{error}=await sb.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.href.split('#')[0]}});
-  $('#login').disabled=false;alert(error?'Gagal: '+error.message:'Cek email kamu, lalu buka link login di perangkat ini.')};
+const SITE='https://naufal-ghani22.github.io/DompetPribadi-App/';
+async function auth(up){const email=$('#email').value.trim(),password=$('#pass').value;if(!email)return $('#email').focus();if(password.length<6)return $('#pass').focus();
+  const b=$(up?'#signup':'#login');b.disabled=true;
+  const{data,error}=up?await sb.auth.signUp({email,password,options:{emailRedirectTo:location.protocol.startsWith('http')?location.href.split('#')[0]:SITE}}):await sb.auth.signInWithPassword({email,password});
+  b.disabled=false;if(error)return alert('Gagal: '+(error.message==='Invalid login credentials'?'Email atau password salah (atau email belum dikonfirmasi).':error.message));
+  $('#pass').value='';if(up&&!data.session)alert('Akun dibuat! Buka email konfirmasi, lalu kembali ke sini dan tekan Masuk.')}
+$('#login').onclick=()=>auth(false);$('#signup').onclick=()=>auth(true);
 $('#logout').onclick=()=>sb.auth.signOut();
 render();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');

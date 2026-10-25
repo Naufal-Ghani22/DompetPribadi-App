@@ -1,8 +1,36 @@
 {
   "name": "dompet-pribadi",
   "version": "1.0.0",
-  "description": "Dompet — budgeting pribadi (PWA + desktop island)",
+  "description": "Dompet â€” budgeting pribadi (PWA + desktop island)",
   "main": "desktop/main.js",
-  "scripts": { "desktop": "electron ." },
-  "devDependencies": { "electron": "33.2.1" }
+  "scripts": {
+    "desktop": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "author": "Naufal Ghani",
+  "build": {
+    "appId": "com.naufalghani.dompet",
+    "productName": "Dompet",
+    "files": [
+      "index.html",
+      "island.html",
+      "manifest.json",
+      "icon.svg",
+      "sw.js",
+      "desktop/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "desktop/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true
+    }
+  }
 }

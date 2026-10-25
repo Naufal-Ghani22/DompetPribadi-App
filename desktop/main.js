@@ -24,7 +24,7 @@ function openFull() {
   if (full && !full.isDestroyed()) return full.show(), full.focus();
   full = new BrowserWindow({
     width: 1100, height: 760, minWidth: 380, backgroundColor: '#0f1412', autoHideMenuBar: true,
-    title: 'Dompet', icon: path.join(__dirname, 'tray.png'),
+    title: 'Dompet', icon: path.join(__dirname, 'icon.png'),
   });
   full.loadFile(path.join(root, 'index.html'));
 }
